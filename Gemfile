@@ -25,6 +25,10 @@ group :development, :test do
   gem 'ruby-debug19'
 end
 
+group :development do 
+  gem 'wirble'
+end
+
 # Use unicorn as the web server
 # gem 'unicorn'
 
