@@ -62,3 +62,8 @@ form label {
   font-weight: bold;
   color: maroon;
 }
+
+#notice {
+	text-align: center;
+	color: red;
+}
