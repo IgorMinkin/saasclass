@@ -9,7 +9,7 @@ class MoviesController < ApplicationController
     @movies = Movie
     
     #sort
-    if !@sort_col.nil? && Movie.valid_column?(@sort_col)
+    if Movie.valid_column?(@sort_col)
       @movies = @movies.order("#{@sort_col} #{@sort_dir}")
       @sort_dir = @sort_dir == 'asc' ? 'desc' : 'asc'
     end
