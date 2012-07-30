@@ -1,15 +1,24 @@
 class MoviesController < ApplicationController
   def index
-    if params[:sort_col].nil? || !Movie.column_names.any? { |col| col == params[:sort_col] } 
-      return @movies = Movie.all
+    @sort_col = params[:sort_col]
+    @sort_dir = ['asc','desc'].find_index(params[:sort_dir]).nil? \
+        ? 'asc' : params[:sort_dir]
+    @rating_filter = !params[:ratings].nil? \
+        ? params[:ratings].select { |k,v| v == '1' } : {}
+    @all_ratings = Movie.ratings
+    @movies = Movie
+    
+    #sort
+    if !@sort_col.nil? && Movie.valid_column?(@sort_col)
+      @movies = @movies.order("#{@sort_col} #{@sort_dir}")
+      @sort_dir = @sort_dir == 'asc' ? 'desc' : 'asc'
     end
     
-    sort_col = params[:sort_col]
-    sort_dir = ['asc','desc'].find_index(params[:sort_dir]).nil? ? 'asc' : params[:sort_dir]
-    flash[:sort_col] = sort_col
-    flash[:sort_dir] = sort_dir == 'asc' ? 'desc' : 'asc'
-    flash[:selected_col_style] = 'hilite'
-    @movies = Movie.all(:order => sort_col + ' ' + sort_dir)
+    #filter
+    if !@rating_filter.empty?
+      @movies = @movies.where(:rating => @rating_filter.keys)
+    end
+    @movies = @movies.all
   end
   
   def show

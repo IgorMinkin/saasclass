@@ -1,13 +1,20 @@
 %h2 All Movies
 
+= form_tag movies_path, :method => :get do
+	Include: 
+	- @all_ratings.each do |rating|
+		= rating
+		= check_box_tag "ratings[#{rating}]", 1, !@rating_filter[rating].nil?
+	= submit_tag 'Refresh'
+
 %table#movies
 	%thead
 		%tr
-			%th{ :class => flash[:sort_col] == 'title' ? flash[:selected_col_style] : nil, :id => 'title_header' }
-				= link_to 'Movie Title', movies_path(:sort_col => 'title', :sort_dir => flash[:sort_dir])
+			%th{ :class => @sort_col == 'title' ? 'hilite' : nil, :id => 'title_header' }
+				= link_to 'Movie Title', movies_path(:sort_col => 'title', :sort_dir => @sort_dir, :ratings => @rating_filter)
 			%th Rating
-			%th{ :class => flash[:sort_col] == 'release_date' ? flash[:selected_col_style] : nil, :id => 'release_date_header' }
-				= link_to 'Release Date', movies_path(:sort_col => 'release_date', :sort_dir => flash[:sort_dir])
+			%th{ :class => @sort_col == 'release_date' ? 'hilite' : nil, :id => 'release_date_header' }
+				= link_to 'Release Date', movies_path(:sort_col => 'release_date', :sort_dir => @sort_dir, :ratings => @rating_filter)
 			%th More Info
 	%tbody
 		- @movies.each do |movie|
