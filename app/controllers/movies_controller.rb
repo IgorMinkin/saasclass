@@ -1,10 +1,10 @@
 class MoviesController < ApplicationController
   def index
-    @sort_col, redirect_flag = get_sort_col
-    @sort_dir, redirect_flag = get_sort_dir
-    @rating_filter, redirect_flag = get_ratings_filter
+    @sort_col = get_sort_col
+    @sort_dir = get_sort_dir
+    @rating_filter = get_ratings_filter
     
-    if redirect_flag
+    if @redirect_flag
       flash.keep
       redirect_to movies_path(:sort_col => @sort_col, :sort_dir => @sort_dir, :ratings => @rating_filter)
     end
@@ -63,9 +63,9 @@ class MoviesController < ApplicationController
     if !params[:sort_col].nil?
       session[:sort_col] = params[:sort_col]
     else
-      redirect_flag = !session[:sort_col].nil?
+      @redirect_flag = !session[:sort_col].nil? unless session[:sort_col].nil?
     end
-    return session[:sort_col], redirect_flag
+    session[:sort_col]
   end
   
   def get_sort_dir
@@ -73,20 +73,20 @@ class MoviesController < ApplicationController
       session[:sort_dir] = ['asc','desc'].find_index(params[:sort_dir]).nil? \
           ? 'asc' : params[:sort_dir]
     else
-      redirect_flag = !session[:sort_dir].nil?
-      session[:sort_dir] = session[:sort_dir].nil? ? 'asc' : session[:sort_dir]
+      @redirect_flag = !session[:sort_dir].nil? unless session[:sort_dir].nil?
+      session[:sort_dir] = session[:sort_dir] || 'asc'
     end
-    return session[:sort_dir], redirect_flag
+    session[:sort_dir]
   end
   
   def get_ratings_filter
     if !params[:ratings].nil? || params[:commit] == 'Refresh'
       session[:ratings] = params[:ratings].nil? ? {} : params[:ratings].select { |k,v| v == '1' } 
-      redirect_flag = params[:commit] == 'Refresh'
+      if params[:commit] == 'Refresh' then @redirect_flag = true end
     else
       session[:ratings] = {} if session[:ratings].nil?
-      redirect_flag = !session[:ratings].empty? && params[:ratings].nil?
+      if !session[:ratings].empty? && params[:ratings].nil? then @redirect_flag = true end
     end
-    return session[:ratings], redirect_flag
+    return session[:ratings]
   end
 end
