@@ -1,10 +1,14 @@
 class MoviesController < ApplicationController
   def index
-    @sort_col = params[:sort_col]
-    @sort_dir = ['asc','desc'].find_index(params[:sort_dir]).nil? \
-        ? 'asc' : params[:sort_dir]
-    @rating_filter = !params[:ratings].nil? \
-        ? params[:ratings].select { |k,v| v == '1' } : {}
+    @sort_col, redirect_flag = get_sort_col
+    @sort_dir, redirect_flag = get_sort_dir
+    @rating_filter, redirect_flag = get_ratings_filter
+    
+    if redirect_flag
+      flash.keep
+      redirect_to movies_path(:sort_col => @sort_col, :sort_dir => @sort_dir, :ratings => @rating_filter)
+    end
+    
     @all_ratings = Movie.ratings
     @movies = Movie
     
@@ -51,5 +55,37 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+  
+  private
+  
+  def get_sort_col
+    if !params[:sort_col].nil?
+      session[:sort_col] = params[:sort_col]
+    else
+      redirect_flag = !session[:sort_col].nil?
+    end
+    return session[:sort_col], redirect_flag
+  end
+  
+  def get_sort_dir
+    if !params[:sort_dir].nil?
+      session[:sort_dir] = ['asc','desc'].find_index(params[:sort_dir]).nil? \
+          ? 'asc' : params[:sort_dir]
+    else
+      redirect_flag = !session[:sort_dir].nil?
+      session[:sort_dir] = session[:sort_dir].nil? ? 'asc' : session[:sort_dir]
+    end
+    return session[:sort_dir], redirect_flag
+  end
+  
+  def get_ratings_filter
+    if !params[:ratings].nil? || params[:commit] == 'Refresh'
+      session[:ratings] = params[:ratings].nil? ? {} : params[:ratings].select { |k,v| v == '1' } 
+    else
+      session[:ratings] = {} if session[:ratings].nil?
+      redirect_flag = !session[:ratings].empty?
+    end
+    return session[:ratings], redirect_flag
   end
 end
