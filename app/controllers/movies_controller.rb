@@ -82,9 +82,10 @@ class MoviesController < ApplicationController
   def get_ratings_filter
     if !params[:ratings].nil? || params[:commit] == 'Refresh'
       session[:ratings] = params[:ratings].nil? ? {} : params[:ratings].select { |k,v| v == '1' } 
+      redirect_flag = params[:commit] == 'Refresh'
     else
       session[:ratings] = {} if session[:ratings].nil?
-      redirect_flag = !session[:ratings].empty?
+      redirect_flag = !session[:ratings].empty? && params[:ratings].nil?
     end
     return session[:ratings], redirect_flag
   end
